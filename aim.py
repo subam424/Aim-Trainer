@@ -1,15 +1,14 @@
 import pygame, time, math
 from random import randint
 from target import Target
+from infobar import GameInfo
 
 pygame.init()
 
 HEIGHT = 600
 WIDTH = 800
-FPS = 120
-GREY = (112, 128, 144)
+FPS = 60
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 AIM = pygame.image.load("aim.png")
 AIM = pygame.transform.scale(AIM, (32, 32))
@@ -24,18 +23,19 @@ aim_rect = AIM.get_rect()
 pygame.mouse.set_visible(False)
 
 target_list = []
-for i in range(3):
-    target = Target(randint(Target.RADIUS, WIDTH - Target.RADIUS), randint(Target.RADIUS, HEIGHT - Target.RADIUS), screen)
+for i in range(5):
+    target = Target(randint(Target.RADIUS, WIDTH - Target.RADIUS), 20 + randint(Target.RADIUS, HEIGHT - Target.RADIUS), screen)
     target_list.append(target)
 
 cursor_pos = pygame.mouse.get_pos()
+game_info = GameInfo(screen)
 
 run = True
 while run:
     clock.tick(FPS)
     screen.fill(WHITE)
     cursor_pos = pygame.mouse.get_pos()
-    pygame.mouse.set_cursor(pygame.cursors.diamond)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -43,15 +43,24 @@ while run:
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             for trg in target_list[:]:
-                if math.sqrt((trg.x-cursor_pos[0])**2 + (trg.y-cursor_pos[1])**2) < target.RADIUS/2:
+                if trg.handle_collision(cursor_pos):
                     target_list.remove(trg)
+                    Target.COUNT += 1
+
+    if len(target_list) != 5:      
+        target_list.append(Target(randint(Target.RADIUS, WIDTH - Target.RADIUS), 20 + randint(Target.RADIUS, HEIGHT - Target.RADIUS), screen))
+
     for trg in target_list:
         trg.show_target()
+        trg.blink()
 
     aim_rect.center = cursor_pos
     screen.blit(AIM, aim_rect)
 
     END = time.time()
+
+    game_info.show_infobar(END-START, Target.COUNT)
+
     pygame.display.flip()
     
 
