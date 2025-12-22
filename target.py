@@ -2,10 +2,13 @@ import pygame, math
 pygame.init()
 
 class Target():
-    MAX_RADIUS = 40
+    MAX_RADIUS = 50
+    MIN_RADIUS = 30
     RADIUS = 40
     IMAGE = pygame.image.load("target.png")
     COUNT = 0
+    SPEED = 1
+    SHRINK = True
     def __init__(self, x, y, screen):
         self.x = x
         self.y = y
@@ -23,5 +26,15 @@ class Target():
         return distance < self.RADIUS / 2
     
     def blink(self):
-        for size in range((self.MAX_RADIUS/2), self.MAX_RADIUS):
-            self.RADIUS = size
+        if self.SHRINK:
+            self.RADIUS -= self.SPEED
+            if self.RADIUS <= self.MIN_RADIUS:
+                self.SHRINK = False
+        else:
+            self.RADIUS += self.SPEED
+            if self.RADIUS >= self.MAX_RADIUS:
+                self.SHRINK = True
+        size = int(self.RADIUS)
+        self.image = pygame.transform.scale(self.IMAGE, (size, size))
+        self.target_rect = self.image.get_rect()
+        self.target_rect.center = (self.x, self.y)
