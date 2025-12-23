@@ -1,4 +1,4 @@
-import pygame, time, math
+import pygame, time
 from random import randint
 from target import Target
 from infobar import GameInfo
@@ -8,17 +8,21 @@ pygame.init()
 HEIGHT = 600
 WIDTH = 800
 FPS = 60
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+BG_COLOR = (15, 15, 20)
+BG_IMAGE = pygame.image.load("bg.png")
+BG_IMAGE = pygame.transform.scale(BG_IMAGE, (WIDTH + 10, HEIGHT + 50))
 AIM = pygame.image.load("aim.png")
-AIM = pygame.transform.scale(AIM, (32, 32))
+AIM = pygame.transform.scale(AIM, (35, 35))
 START = time.time()
 END = 0
+SHOOT = pygame.mixer.Sound("shoot.mp3")
+BREAK = pygame.mixer.Sound("break.mp3")
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Aim Trainer")
 clock = pygame.time.Clock()
 
+bg_rect = BG_IMAGE.get_rect()
 aim_rect = AIM.get_rect()
 pygame.mouse.set_visible(False)
 
@@ -33,7 +37,9 @@ game_info = GameInfo(screen)
 run = True
 while run:
     clock.tick(FPS)
-    screen.fill(WHITE)
+    bg_rect.center = (WIDTH // 2, (HEIGHT - 50) // 2)
+    screen.blit(BG_IMAGE, bg_rect)
+
     cursor_pos = pygame.mouse.get_pos()
 
     for event in pygame.event.get():
@@ -42,9 +48,11 @@ while run:
             break
         
         if event.type == pygame.MOUSEBUTTONDOWN:
+            SHOOT.play(loops=0)
             for trg in target_list[:]:
                 if trg.handle_collision(cursor_pos):
                     target_list.remove(trg)
+                    BREAK.play(loops=0)
                     Target.COUNT += 1
 
     if len(target_list) != 5:      
@@ -58,7 +66,6 @@ while run:
     screen.blit(AIM, aim_rect)
 
     END = time.time()
-
     game_info.show_infobar(END-START, Target.COUNT)
 
     pygame.display.flip()
