@@ -5,7 +5,7 @@ class Target():
     MAX_RADIUS = 50
     MIN_RADIUS = 30
     RADIUS = 40
-    IMAGE = pygame.image.load("target.png")
+    IMAGE = pygame.image.load("assets/target.png")
     COUNT = 0
     SPEED = 1
     SHRINK = True

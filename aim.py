@@ -9,14 +9,14 @@ HEIGHT = 600
 WIDTH = 800
 FPS = 60
 BG_COLOR = (15, 15, 20)
-BG_IMAGE = pygame.image.load("bg.png")
+BG_IMAGE = pygame.image.load("assets/bg.png")
 BG_IMAGE = pygame.transform.scale(BG_IMAGE, (WIDTH + 10, HEIGHT + 50))
-AIM = pygame.image.load("aim.png")
+AIM = pygame.image.load("assets/aim.png")
 AIM = pygame.transform.scale(AIM, (35, 35))
 START = time.time()
 END = 0
-SHOOT = pygame.mixer.Sound("shoot.mp3")
-BREAK = pygame.mixer.Sound("break.mp3")
+SHOOT = pygame.mixer.Sound("assets/shoot.mp3")
+BREAK = pygame.mixer.Sound("assets/break.mp3")
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Aim Trainer")
