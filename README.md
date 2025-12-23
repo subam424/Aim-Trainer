@@ -33,9 +33,7 @@ An interactive **Aim Trainer** built to help users improve mouse accuracy, react
 
 ## Technologies Used
 - Python  
-- Pygame *(remove if not used)*  
-- Event-driven programming  
-- Basic game loop logic
+- Pygame
 
 ## How to Run
 1. Clone the repository:
