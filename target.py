@@ -1,40 +1,52 @@
-import pygame, math
+import pygame
+from math import sin, cos, sqrt, radians
+from random import randint
 pygame.init()
 
-class Target():
-    MAX_RADIUS = 50
-    MIN_RADIUS = 30
-    RADIUS = 40
-    IMAGE = pygame.image.load("assets/target.png")
+class Bottle:
+    RADIUS = 70
+    WIDTH = 800
+    HEIGHT = 600
+    BOTTLE = pygame.image.load("assets/bottle.png")
+    BROKEN = pygame.image.load("assets/broken_bottle.png")
     COUNT = 0
-    SPEED = 1
-    SHRINK = True
-    def __init__(self, x, y, screen):
-        self.x = x
-        self.y = y
-        self.size = 0
+    def __init__(self, screen):
         self.screen = screen
-        self.image = pygame.transform.scale(self.IMAGE, (self.RADIUS, self.RADIUS))
-        self.target_rect = self.image.get_rect()
-        self.target_rect.center = (self.x, self.y)
+        self.x = randint(0, self.WIDTH)
+        self.y = self.HEIGHT + 20
+
+        self.rotation_angle = 0
+        self.rotation_speed = randint(-5, 5)
+
+        self.bottle = pygame.transform.scale(self.BOTTLE, (self.RADIUS, self.RADIUS))
+        self.broken = pygame.transform.scale(self.BROKEN, (self.RADIUS, self.RADIUS))
+        self.image = self.bottle
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+        launch_angle = randint(45, 90) if self.x < self.WIDTH // 2 else randint(90, 135) 
+        self.angle = radians(launch_angle)
+
+        self.gravity = 0.1
+        self.speed = 10
+        self.x_speed = self.speed*cos(self.angle)
+        self.y_speed = -self.speed*sin(self.angle)
+        self.is_broken = False
     
-    def show_target(self):
-        self.screen.blit(self.image, self.target_rect)
+    def update(self):
+        self.y_speed += self.gravity
+        self.x += self.x_speed
+        self.y += self.y_speed
+        self.rotation_angle += self.rotation_speed
+
+        base_img = self.broken if self.is_broken else self.bottle
+        self.image = pygame.transform.rotate(base_img, self.rotation_angle)
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+    def draw(self):
+        self.screen.blit(self.image, self.rect)
 
     def handle_collision(self, mouse_pos):
-        distance = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
-        return distance < self.RADIUS / 2
-    
-    def blink(self):
-        if self.SHRINK:
-            self.RADIUS -= self.SPEED
-            if self.RADIUS <= self.MIN_RADIUS:
-                self.SHRINK = False
-        else:
-            self.RADIUS += self.SPEED
-            if self.RADIUS >= self.MAX_RADIUS:
-                self.SHRINK = True
-        size = int(self.RADIUS)
-        self.image = pygame.transform.scale(self.IMAGE, (size, size))
-        self.target_rect = self.image.get_rect()
-        self.target_rect.center = (self.x, self.y)
+        if not self.is_broken:
+            distance = sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
+            return distance < self.RADIUS / 2
+        return False

@@ -1,6 +1,5 @@
 import pygame, time
-from random import randint
-from target import Target
+from target import Bottle
 from infobar import GameInfo
 
 pygame.init()
@@ -26,49 +25,51 @@ bg_rect = BG_IMAGE.get_rect()
 aim_rect = AIM.get_rect()
 pygame.mouse.set_visible(False)
 
-target_list = []
-for i in range(5):
-    target = Target(randint(Target.RADIUS, WIDTH - Target.RADIUS), 20 + randint(Target.RADIUS, HEIGHT - Target.RADIUS), screen)
-    target_list.append(target)
+bottles_list = []
+for _ in range(2):
+    bottles_list.append(Bottle(screen))
 
 cursor_pos = pygame.mouse.get_pos()
 game_info = GameInfo(screen)
+def main():
+    run = True
+    while run:
+        clock.tick(FPS)
+        bg_rect.center = (WIDTH // 2, (HEIGHT - 50) // 2)
+        screen.blit(BG_IMAGE, bg_rect)
 
-run = True
-while run:
-    clock.tick(FPS)
-    bg_rect.center = (WIDTH // 2, (HEIGHT - 50) // 2)
-    screen.blit(BG_IMAGE, bg_rect)
+        cursor_pos = pygame.mouse.get_pos()
 
-    cursor_pos = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                break
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                SHOOT.play(loops=0)
+                for b in bottles_list:
+                    if not b.is_broken and b.handle_collision(cursor_pos):
+                        b.is_broken = True
+                        Bottle.COUNT += 1
+                        BREAK.play(loops=0)
+                        bottles_list.append(Bottle(screen))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-            break
-        
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            SHOOT.play(loops=0)
-            for trg in target_list[:]:
-                if trg.handle_collision(cursor_pos):
-                    target_list.remove(trg)
-                    BREAK.play(loops=0)
-                    Target.COUNT += 1
+        for b in bottles_list[:]:
+            b.draw()
+            b.update()
+            if b.y > (HEIGHT + 25):
+                bottles_list.remove(b)
+                if len(bottles_list) < 4:
+                    bottles_list.append(Bottle(screen))
 
-    if len(target_list) != 5:      
-        target_list.append(Target(randint(Target.RADIUS, WIDTH - Target.RADIUS), 20 + randint(Target.RADIUS, HEIGHT - Target.RADIUS), screen))
+        aim_rect.center = cursor_pos
+        screen.blit(AIM, aim_rect)
 
-    for trg in target_list:
-        trg.show_target()
-        trg.blink()
+        END = time.time()
+        game_info.show_infobar(END-START, Bottle.COUNT)
 
-    aim_rect.center = cursor_pos
-    screen.blit(AIM, aim_rect)
-
-    END = time.time()
-    game_info.show_infobar(END-START, Target.COUNT)
-
-    pygame.display.flip()
+        pygame.display.flip()
     
-
-pygame.quit()
+if __name__ == "__main__":
+    main()
+    pygame.quit()
